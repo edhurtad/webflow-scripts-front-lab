@@ -1,88 +1,163 @@
 import {
-  onlyNumberKey,
-  handleKeyUpThousandSeparators,
-  validPhoneNumber,
   validateEmail,
-  validDocumentNumber,
   removeAllOptions,
   addFirstOption,
   removeAccents,
+  configureOnlyNumbersInput,
 } from "./shared/utils.js";
+
 import { inputEvent } from "./shared/date-format.js";
 import { getDepartments, getCities } from "./services/location.service.js";
 
+const inputPhoneNumber = document.getElementById("phone_number");
+const inputTransactionDate = document.getElementById("transaction_date");
+const selectDepartment = document.getElementById("department");
+const selectCity = document.getElementById("city");
+const inputEmail = document.getElementById("email");
+const inputDocumentNumber = document.getElementById("document_number");
+const inputCorrespondentCode = document.getElementById("correspondent_code");
+const inputChargedAmount = document.getElementById("charged_amount");
+const inputTransactionAmount = document.getElementById("transaction_amount");
+const inputTextFields = document.querySelectorAll(".input_text");
 
-const inputPhoneNumber = document.getElementById("numero_celular");
-const customPrice = document.querySelectorAll(".custom_price");
-const inputDateTakeMoney = document.getElementById("fecha_recarga");
-const selDepartments = document.querySelector("#departamentos");
-const selCities = document.querySelector("#ciudades");
-const inputDocumentMail = document.getElementById("correo_electronico");
-const inputDocumentNumber = document.querySelectorAll(".numero_documento");
-const inputDocumentTexts = document.querySelectorAll(".input_text");
-
-const validateInputs = () => {
-  inputPhoneNumber.onkeypress = validPhoneNumber;
-
-  customPrice.forEach((input) => {
-    input.onkeyup = handleKeyUpThousandSeparators;
-    input.onkeypress = onlyNumberKey;
-  });
-
-  inputDateTakeMoney.oninput = inputEvent;
-
-  inputDocumentMail.oninput = validateEmail;
-
-  inputDocumentNumber.onkeypress = validDocumentNumber;
-
-  inputDocumentNumber.forEach((input) => {
-    input.onkeypress = onlyNumberKey;
-  });
-};
-
+/**
+ * Normaliza textos eliminando tildes, ñ y comas.
+ *
+ * @param {Event} event
+ * @returns {void}
+ */
 const handleNormalizeInput = (event) => {
   event.target.value = removeAccents(event.target.value);
 };
 
-inputDocumentTexts.forEach((input) => {
-  input.addEventListener("input", handleNormalizeInput);
-});
+/**
+ * Configura validaciones de inputs del formulario.
+ *
+ * @returns {void}
+ */
+const validateInputs = () => {
+  configureOnlyNumbersInput({
+    input: inputPhoneNumber,
+    maxLength: 10,
+  });
 
+  configureOnlyNumbersInput({
+    input: inputDocumentNumber,
+    maxLength: 15,
+  });
+
+  configureOnlyNumbersInput({
+    input: inputCorrespondentCode,
+    maxLength: 4,
+  });
+
+  configureOnlyNumbersInput({
+    input: inputChargedAmount,
+    maxLength: 4,
+  });
+
+  configureOnlyNumbersInput({
+    input: inputTransactionAmount,
+    maxLength: 100,
+  });
+
+  if (inputTransactionDate) {
+    inputTransactionDate.oninput = inputEvent;
+  }
+
+  if (inputEmail) {
+    inputEmail.oninput = validateEmail;
+  }
+};
+
+/**
+ * Configura normalización de campos de texto.
+ *
+ * @returns {void}
+ */
+const normalizeTextInputs = () => {
+  inputTextFields.forEach((input) => {
+    input.addEventListener("input", handleNormalizeInput);
+  });
+};
+
+/**
+ * Carga departamentos en el select.
+ *
+ * @returns {Promise<void>}
+ */
 const loadDepartments = async () => {
+  if (!selectDepartment) return;
+
   const { deparments } = await getDepartments();
-  addFirstOption("Seleccione el departamento", selDepartments);
+
+  addFirstOption("Seleccione el departamento", selectDepartment);
+
   deparments.forEach((department) => {
     const option = document.createElement("option");
+
     option.value = department.id;
     option.setAttribute("key", department.key);
     option.innerHTML = department.label;
-    selDepartments.appendChild(option);
+
+    selectDepartment.appendChild(option);
   });
 };
 
-const loadCities = async (keyDepartment) => {
-  removeAllOptions(selCities);
-  addFirstOption("Seleccione la ciudad", selCities);
-  const cities = await getCities(keyDepartment);
+/**
+ * Carga ciudades según el departamento seleccionado.
+ *
+ * @param {string} departmentKey
+ * @returns {Promise<void>}
+ */
+const loadCities = async (departmentKey) => {
+  if (!selectCity || !departmentKey) return;
+
+  removeAllOptions(selectCity);
+  addFirstOption("Seleccione la ciudad", selectCity);
+
+  const cities = await getCities(departmentKey);
+
   cities.forEach((city) => {
     const option = document.createElement("option");
+
     option.value = city.id;
     option.innerHTML = city.label;
-    selCities.appendChild(option);
+
+    selectCity.appendChild(option);
   });
 };
 
+/**
+ * Maneja el cambio de departamento.
+ *
+ * @returns {Promise<void>}
+ */
 const handleChangeDepartment = async () => {
-  const deparmentSelected =
-    selDepartments.options[selDepartments.selectedIndex].getAttribute("key");
-  await loadCities(deparmentSelected);
+  if (!selectDepartment) return;
+
+  const selectedOption = selectDepartment.options[selectDepartment.selectedIndex];
+  const departmentKey = selectedOption?.getAttribute("key");
+
+  await loadCities(departmentKey);
 };
 
+/**
+ * Inicializa el formulario.
+ *
+ * @returns {Promise<void>}
+ */
 const main = async () => {
   validateInputs();
+  normalizeTextInputs();
+
   await loadDepartments();
-  addFirstOption("Seleccione la ciudad", selCities);
-  selDepartments.addEventListener("change", handleChangeDepartment);
+
+  if (selectCity) {
+    addFirstOption("Seleccione la ciudad", selectCity);
+  }
+
+  selectDepartment?.addEventListener("change", handleChangeDepartment);
 };
 
 main();

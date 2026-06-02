@@ -218,3 +218,32 @@ export const validatePhone = (inputId = 'phoneNumber') => {
     checkbox.setCustomValidity("");
     return true;
   };
+
+  /* ---------refactor corresponsales------------ */
+
+  /**
+ * Configura un input para aceptar solo números y limitar su longitud.
+ *
+ * @param {Object} params
+ * @param {HTMLInputElement|null} params.input - Input a configurar.
+ * @param {number} params.maxLength - Cantidad máxima de dígitos permitidos.
+ * @param {boolean} [params.preventPaste=false] - Bloquea el pegado si es true.
+ * @returns {void}
+ */
+export const configureOnlyNumbersInput = ({
+  input,
+  maxLength,
+  preventPaste = false,
+} = {}) => {
+  if (!input) return;
+
+  input.addEventListener("input", () => {
+    input.value = input.value.replace(/\D/g, "").slice(0, maxLength);
+  });
+
+  if (preventPaste) {
+    input.addEventListener("paste", (event) => {
+      event.preventDefault();
+    });
+  }
+};
