@@ -1,4 +1,4 @@
-import { config } from '../config/config'
+import { config } from '../config/config.js'
 export const getDepartments = async () => {
     return new Promise((resolve, reject) => {
         fetch(`${config.apiUrlCities}/z_departaments.json`)
