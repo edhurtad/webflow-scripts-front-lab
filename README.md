@@ -1,6 +1,6 @@
-# Scripts utilizados en la página web: https://www.nequi.com.co
+# Scripts utilizados
 
-- Contiene scripts para validacion de campos en formularios, logica para simulador de credito
+- Contiene scripts para validacion de campos en formularios
 
 ## Pasos para generar los scripts minificados y ofuscados
 
