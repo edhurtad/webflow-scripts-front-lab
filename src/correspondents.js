@@ -48,7 +48,7 @@ const validateInputs = () => {
 
   configureOnlyNumbersInput({
     input: inputCorrespondentCode,
-    maxLength: 4,
+    maxLength: 6,
   });
 
   configureOnlyNumbersInput({
