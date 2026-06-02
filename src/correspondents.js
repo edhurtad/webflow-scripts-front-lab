@@ -11,6 +11,7 @@ import {
 import { inputEvent } from "./shared/date-format.js";
 import { getDepartments, getCities } from "./services/location.service.js";
 
+
 const inputPhoneNumber = document.getElementById("numero_celular");
 const customPrice = document.querySelectorAll(".custom_price");
 const inputDateTakeMoney = document.getElementById("fecha_recarga");
